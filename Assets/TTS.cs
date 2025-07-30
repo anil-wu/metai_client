@@ -14,9 +14,9 @@ public class TTS
 {
     // TTS配置参数
     public string appkey = "V6fJ9tzk8lpPsJDi";
-    public string token = "fd73fd505db54c3498df8d22fab4e490";
+    public string token = "619a98169e534748a14742ffa0445153";
     public string voice = "zhibei_emo";
-    public string emotionCategory = "happy";
+    // public string emotionCategory = "happy";
     public float emotionIntensity = 1.0f;
 
     // 音频保存路径
@@ -34,9 +34,9 @@ public class TTS
     // 定义回调委托
     public delegate void TTSCallback(string audioPath);
 
-    public IEnumerator SynthesizeSpeech(string textContent, System.Action<byte[]> audioCallback = null)
+    public IEnumerator SynthesizeSpeech(string textContent, string emotionCategory,System.Action<byte[]> audioCallback = null)
     {
-        Debug.Log("开始TTS请求...");
+        Debug.Log("开始TTS请求..." + textContent);
 
         // 生成SSML格式文本
         string ssmlText = $@"<speak voice=""{voice}"">
@@ -98,63 +98,6 @@ public class TTS
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 string error = $"TTS请求失败: {response.StatusCode} - {response.ReasonPhrase}\n响应内容: {responseBody}";
                 Debug.LogError(error);
-            }
-        }
-
-        yield return null;
-    }
-
-    // 发送POST请求
-    private IEnumerator ProcessPOSTRequest(string text, string audioSaveFile, string format, int sampleRate)
-    {
-        string url = "https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/tts";
-
-#if NEWTONSOFT_JSON
-        JObject obj = new JObject();
-        obj["voice"] = voice;
-        obj["appkey"] = appkey;
-        obj["token"] = token;
-        obj["text"] = text;
-        obj["format"] = format;
-        obj["sample_rate"] = sampleRate;
-        string bodyContent = obj.ToString();
-#else
-        // 使用Unity的JsonUtility创建JSON
-        TTSRequestData requestData = new TTSRequestData {
-            appkey = appkey,
-            token = token,
-            text = text,
-            format = format,
-            sample_rate = sampleRate,
-            voice = voice
-        };
-        string bodyContent = JsonUtility.ToJson(requestData);
-#endif
-        StringContent content = new StringContent(bodyContent, Encoding.UTF8, "application/json");
-
-        using (HttpClient client = new HttpClient())
-        {
-            HttpResponseMessage response = client.PostAsync(url, content).Result;
-
-            // 获取Content-Type
-            string contentType = response.Content.Headers.ContentType?.MediaType;
-            Debug.Log($"TTS响应Content-Type: {contentType}");
-
-            if (response.IsSuccessStatusCode && contentType != null && contentType.StartsWith("audio/"))
-            {
-                byte[] audioBuff = response.Content.ReadAsByteArrayAsync().Result;
-                File.WriteAllBytes(audioSaveFile, audioBuff);
-                Debug.Log($"TTS请求成功! 音频已保存 ({audioBuff.Length} 字节)");
-            }
-            else
-            {
-                // 记录详细错误信息
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                string error = $"TTS请求失败: {response.StatusCode} - {response.ReasonPhrase}\n响应内容: {responseBody}";
-                Debug.LogError(error);
-
-                // 保存错误响应到文件以便分析
-                File.WriteAllText(audioSaveFile + ".error.txt", error);
             }
         }
 
