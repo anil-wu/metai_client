@@ -1517,11 +1517,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 260587156957387973, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1080
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 260587156957387973, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 260587156957387973, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1571,9 +1571,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1591134113961672780, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_MinSize
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1591134113961672780, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 28
+      objectReference: {fileID: 0}
+    - target: {fileID: 1591134113961672780, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3811350555043156096, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_Name
       value: InputPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4090000988638676914, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_MinSize
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4090000988638676914, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 28
+      objectReference: {fileID: 0}
+    - target: {fileID: 4090000988638676914, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4740801755584663799, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: mteaAI
@@ -1583,6 +1607,18 @@ PrefabInstance:
       propertyPath: chatPanel
       value: 
       objectReference: {fileID: 716969204}
+    - target: {fileID: 8018904728711442504, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 845.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8018904728711442504, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -64
+      objectReference: {fileID: 0}
+    - target: {fileID: 8370081408737667964, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 433
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 801636237513128887, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
     m_RemovedGameObjects: []
