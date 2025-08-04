@@ -47,12 +47,11 @@ public class LoginUI : MonoBehaviour {
             GuestLoginResponse response = JsonUtility.FromJson<GuestLoginResponse>(request.downloadHandler.text);
             Debug.Log($"{response.message}, Token: {response.token}");
 
-            // 保存Token
+            // 保存 Token
             PlayerPrefs.SetString("AuthToken", response.token);
 
             // 触发登录成功事件
-            var loginData = new Dictionary<string, object>
-            {
+            var loginData = new Dictionary<string, object> {
                 { "username", usernameInput.text },
                 { "token", response.token }
             };

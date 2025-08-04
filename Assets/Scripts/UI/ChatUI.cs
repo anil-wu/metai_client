@@ -7,8 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 聊天面板控制器（带消息动画效果）
 /// </summary>
-public class ChatUI : MonoBehaviour
-{
+public class ChatUI : MonoBehaviour {
     public GameObject messageItemPrefab; // 消息项预制体
     public RectTransform messageContainer; // 消息容器
     public Color userMessageColor = new Color(0.2f, 0.5f, 1f, 1f); // 用户消息颜色（蓝色）
@@ -17,19 +16,18 @@ public class ChatUI : MonoBehaviour
     // 动画参数
     public float animationDuration = 0.5f; // 动画持续时间
     public float startScale = 0.5f;        // 初始缩放比例
-    public float verticalOffset = 100f;     // 垂直偏移量
+    public float verticalOffset = 100f;    // 垂直偏移量
 
     // 面板控制
-    private CanvasGroup canvasGroup;       // 控制面板透明度的CanvasGroup
+    private CanvasGroup canvasGroup;       // 控制面板透明度的 CanvasGroup
 
     // 消息管理
     private MessageItem currentMessage;    // 当前消息
     private MessageItem previousMessage;   // 上一条消息
     private List<MessageItem> messagePool = new List<MessageItem>(); // 消息项池子
 
-    void Start()
-    {
-        // 添加或获取CanvasGroup组件
+    void Start() {
+        // 添加或获取 CanvasGroup 组件
         canvasGroup = gameObject.GetComponent<CanvasGroup>();
         if (canvasGroup == null) {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -48,8 +46,7 @@ public class ChatUI : MonoBehaviour
     }
 
     // 处理连接状态变化
-    private void HandleConnectionStatus(object isConnectedObj)
-    {
+    private void HandleConnectionStatus(object isConnectedObj) {
         if (isConnectedObj is bool isConnected) {
             if (isConnected) {
                 // 连接成功时淡入显示
@@ -62,13 +59,11 @@ public class ChatUI : MonoBehaviour
     }
 
     // 面板淡入淡出协程
-    private IEnumerator FadePanel(float targetAlpha, float duration)
-    {
+    private IEnumerator FadePanel(float targetAlpha, float duration) {
         float startAlpha = canvasGroup.alpha;
         float elapsed = 0;
 
-        while (elapsed < duration)
-        {
+        while (elapsed < duration) {
             elapsed += Time.deltaTime;
             canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
             yield return null;
@@ -79,8 +74,7 @@ public class ChatUI : MonoBehaviour
         canvasGroup.blocksRaycasts = targetAlpha > 0.5f;
     }
 
-    void OnDestroy()
-    {
+    void OnDestroy() {
         // 取消注册聊天消息事件
         EventManager.StopListening(EventManager.AddMessageToChat, HandleAddMessageEvent);
 
@@ -89,14 +83,12 @@ public class ChatUI : MonoBehaviour
     }
 
     // 处理添加消息事件
-    private void HandleAddMessageEvent(object messageObj)
-    {
+    private void HandleAddMessageEvent(object messageObj) {
         // 动态解析事件参数
         var messageData = messageObj as Dictionary<string, object>;
         if (messageData != null &&
             messageData.ContainsKey("content") &&
-            messageData.ContainsKey("isUserMessage"))
-        {
+            messageData.ContainsKey("isUserMessage")) {
             string content = messageData["content"].ToString();
             bool isUserMessage = (bool)messageData["isUserMessage"];
             AddMessage(content, isUserMessage);
@@ -104,17 +96,14 @@ public class ChatUI : MonoBehaviour
     }
 
     // 添加新消息
-    public void AddMessage(string content, bool isUserMessage)
-    {
+    public void AddMessage(string content, bool isUserMessage) {
         // 如果有当前消息，先转换为上一条消息
-        if (currentMessage != null)
-        {
+        if (currentMessage != null) {
             previousMessage = currentMessage;
         }
 
         // 如果有上一条消息，启动退出动画
-        if (previousMessage != null)
-        {
+        if (previousMessage != null) {
             StartCoroutine(AnimateMessageExit(previousMessage));
         }
 
@@ -135,15 +124,13 @@ public class ChatUI : MonoBehaviour
     }
 
     // 消息进入动画
-    private IEnumerator AnimateMessageEnter(MessageItem item)
-    {
+    private IEnumerator AnimateMessageEnter(MessageItem item) {
         RectTransform rt = item.GetComponent<RectTransform>();
         float elapsed = 0;
         Vector3 startPos = rt.anchoredPosition;
         Vector3 targetPos = Vector2.zero;
 
-        while (elapsed < animationDuration)
-        {
+        while (elapsed < animationDuration) {
             elapsed += Time.deltaTime;
             float t = elapsed / animationDuration;
 
@@ -166,15 +153,13 @@ public class ChatUI : MonoBehaviour
     }
 
     // 消息退出动画
-    private IEnumerator AnimateMessageExit(MessageItem item)
-    {
+    private IEnumerator AnimateMessageExit(MessageItem item) {
         RectTransform rt = item.GetComponent<RectTransform>();
         float elapsed = 0;
         Vector3 startPos = rt.anchoredPosition;
         Vector3 targetPos = new Vector2(0, verticalOffset); // 向上移动
 
-        while (elapsed < animationDuration)
-        {
+        while (elapsed < animationDuration) {
             elapsed += Time.deltaTime;
             float t = elapsed / animationDuration;
 
@@ -197,13 +182,10 @@ public class ChatUI : MonoBehaviour
     }
 
     // 从缓存池获取消息项
-    private MessageItem GetMessageItemFromPool()
-    {
+    private MessageItem GetMessageItemFromPool() {
         // 尝试从缓存池获取
-        foreach (MessageItem item in messagePool)
-        {
-            if (!item.gameObject.activeSelf)
-            {
+        foreach (MessageItem item in messagePool) {
+            if (!item.gameObject.activeSelf) {
                 item.gameObject.SetActive(true);
                 return item;
             }

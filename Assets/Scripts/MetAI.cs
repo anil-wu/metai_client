@@ -36,8 +36,7 @@ public class MetAI : MonoBehaviour {
 
     // 视频播放组件已移除（由 Role2D 替代）
 
-    void Start()
-    {
+    void Start() {
         Debug.Log("MetAI starty");
         gameObject.SetActive(false);
 
@@ -99,7 +98,6 @@ public class MetAI : MonoBehaviour {
 
             // 启动连接协程
             // ConnectWebSocket(); // 替换为实际 WebSocket 服务器地址
-
         }
     }
 
@@ -117,8 +115,7 @@ public class MetAI : MonoBehaviour {
     public void SendMessageToChat(string message) {
         if (!string.IsNullOrEmpty(message)) {
             // 创建消息数据字典
-            var messageData = new Dictionary<string, object>
-            {
+            var messageData = new Dictionary<string, object> {
                 { "content", message },
                 { "isUserMessage", true }
             };
@@ -175,7 +172,7 @@ public class MetAI : MonoBehaviour {
 
             int dataStart = 44;
             for (int i = 0; i < wavData.Length - 4; i++) {
-                if (wavData[i] == 'd' && wavData[i+1] == 'a' && wavData[i+2] == 't' && wavData[i+3] == 'a') {
+                if (wavData[i] == 'd' && wavData[i + 1] == 'a' && wavData[i + 2] == 't' && wavData[i + 3] == 'a') {
                     dataStart = i + 8;
                     break;
                 }
@@ -276,8 +273,7 @@ public class MetAI : MonoBehaviour {
                     Debug.Log($"收到回复: {answerText}  action: {response.data.action}");
 
                     // 创建消息数据字典
-                    var messageData = new Dictionary<string, object>
-                    {
+                    var messageData = new Dictionary<string, object> {
                         { "content", answerText },
                         { "isUserMessage", false }
                     };

@@ -66,7 +66,8 @@ public class WebSocketManager : MonoBehaviour {
             await webSocket.CloseAsync(
                 WebSocketCloseStatus.NormalClosure,
                 "关闭连接",
-                CancellationToken.None);
+                CancellationToken.None
+            );
         } finally {
             if (webSocket != null) {
                 webSocket.Dispose();
@@ -95,13 +96,14 @@ public class WebSocketManager : MonoBehaviour {
         try {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
-            // 使用Task.Run在后台线程执行发送操作
+            // 使用 Task.Run 在后台线程执行发送操作
             sendTask = Task.Run(async () => {
                 await webSocket.SendAsync(
                     new ArraySegment<byte>(messageBytes),
                     WebSocketMessageType.Text,
                     true,
-                    CancellationToken.None);
+                    CancellationToken.None
+                );
             });
         } catch (Exception ex) {
             Debug.LogError($"消息发送失败: {ex.Message}");
@@ -120,7 +122,7 @@ public class WebSocketManager : MonoBehaviour {
 
     // 接收消息协程（支持任意长度消息）
     private IEnumerator ReceiveMessages() {
-        // 使用MemoryStream动态处理任意长度消息
+        // 使用 MemoryStream 动态处理任意长度消息
         var buffer = new byte[4096];
         var segment = new ArraySegment<byte>(buffer);
 
