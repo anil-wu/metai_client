@@ -8,10 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class WebSocketManager : MonoBehaviour
-{
-    public enum ConnectionStatus
-    {
+public class WebSocketManager : MonoBehaviour {
+    public enum ConnectionStatus {
         Connecting,
         Connected,
         Disconnected,
@@ -30,16 +28,13 @@ public class WebSocketManager : MonoBehaviour
     public event Action<string> OnMessageReceived;
 
     // 初始化 WebSocket 连接
-    public async void Connect(string url)
-    {
-        if (webSocket != null && webSocket.State == WebSocketState.Open)
-        {
+    public async void Connect(string url) {
+        if (webSocket != null && webSocket.State == WebSocketState.Open) {
             Debug.LogWarning("WebSocket 已连接");
             return;
         }
 
-        try
-        {
+        try {
             serverUri = new Uri(url);
             webSocket = new ClientWebSocket();
             cancellationTokenSource = new CancellationTokenSource();
@@ -56,9 +51,7 @@ public class WebSocketManager : MonoBehaviour
 
             // 启动接收消息协程
             StartCoroutine(ReceiveMessages());
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Debug.LogError($"WebSocket 连接失败: {ex.Message}");
             OnConnectionProgress?.Invoke($"连接失败: {ex.Message}");
             OnConnectionChanged?.Invoke(false);
@@ -66,21 +59,16 @@ public class WebSocketManager : MonoBehaviour
     }
 
     // 断开连接
-    public async void Disconnect()
-    {
+    public async void Disconnect() {
         if (webSocket == null) return;
 
-        try
-        {
+        try {
             await webSocket.CloseAsync(
                 WebSocketCloseStatus.NormalClosure,
                 "关闭连接",
                 CancellationToken.None);
-        }
-        finally
-        {
-            if (webSocket != null)
-            {
+        } finally {
+            if (webSocket != null) {
                 webSocket.Dispose();
                 webSocket = null;
                 cancellationTokenSource?.Cancel();
@@ -92,88 +80,69 @@ public class WebSocketManager : MonoBehaviour
     }
 
     // 发送消息（改为协程方式）
-    public void SendMessage(string message)
-    {
+    public void SendMessage(string message) {
         StartCoroutine(SendMessageCoroutine(message));
     }
 
     // 消息发送协程
-    private IEnumerator SendMessageCoroutine(string message)
-    {
-        if (webSocket == null || webSocket.State != WebSocketState.Open)
-        {
+    private IEnumerator SendMessageCoroutine(string message) {
+        if (webSocket == null || webSocket.State != WebSocketState.Open) {
             Debug.LogWarning("无法发送消息: WebSocket 未连接");
             yield break;
         }
 
         Task sendTask = null;
-        try
-        {
+        try {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
             // 使用Task.Run在后台线程执行发送操作
-            sendTask = Task.Run(async () =>
-            {
+            sendTask = Task.Run(async () => {
                 await webSocket.SendAsync(
                     new ArraySegment<byte>(messageBytes),
                     WebSocketMessageType.Text,
                     true,
                     CancellationToken.None);
             });
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Debug.LogError($"消息发送失败: {ex.Message}");
             yield break;
         }
 
         // 等待发送完成但不阻塞主线程
-        while (!sendTask.IsCompleted)
-        {
+        while (!sendTask.IsCompleted) {
             yield return null;
         }
 
-        if (sendTask.IsFaulted)
-        {
+        if (sendTask.IsFaulted) {
             Debug.LogError($"消息发送失败: {sendTask.Exception.Message}");
         }
     }
 
     // 接收消息协程（支持任意长度消息）
-    private IEnumerator ReceiveMessages()
-    {
+    private IEnumerator ReceiveMessages() {
         // 使用MemoryStream动态处理任意长度消息
         var buffer = new byte[4096];
         var segment = new ArraySegment<byte>(buffer);
 
-        while (webSocket != null && webSocket.State == WebSocketState.Open)
-        {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
+        while (webSocket != null && webSocket.State == WebSocketState.Open) {
+            using (MemoryStream memoryStream = new MemoryStream()) {
                 WebSocketReceiveResult result = null;
                 bool isFirstChunk = true;
 
-                do
-                {
+                do {
                     // 第一步：启动接收任务
                     Task<WebSocketReceiveResult> receiveTask = null;
-                    try
-                    {
+                    try {
                         // 首次接收使用初始缓冲区，后续使用新缓冲区
-                        if (isFirstChunk)
-                        {
+                        if (isFirstChunk) {
                             receiveTask = webSocket.ReceiveAsync(segment, cancellationTokenSource.Token);
-                        }
-                        else
-                        {
+                        } else {
                             // 创建新缓冲区接收后续分片
                             buffer = new byte[4096];
                             segment = new ArraySegment<byte>(buffer);
                             receiveTask = webSocket.ReceiveAsync(segment, cancellationTokenSource.Token);
                         }
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         Debug.LogError($"启动接收失败: {ex.Message}");
                         Disconnect();
                         yield break;
@@ -183,16 +152,13 @@ public class WebSocketManager : MonoBehaviour
                     yield return new WaitUntil(() => receiveTask.IsCompleted);
 
                     // 第二步：处理接收结果
-                    try
-                    {
-                        if (receiveTask.IsFaulted)
-                        {
+                    try {
+                        if (receiveTask.IsFaulted) {
                             throw receiveTask.Exception;
                         }
 
                         result = receiveTask.Result;
-                        if (result.MessageType == WebSocketMessageType.Close)
-                        {
+                        if (result.MessageType == WebSocketMessageType.Close) {
                             Disconnect();
                             yield break;
                         }
@@ -200,24 +166,18 @@ public class WebSocketManager : MonoBehaviour
                         // 将接收到的数据写入内存流
                         memoryStream.Write(buffer, 0, result.Count);
                         isFirstChunk = false;
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         Debug.LogError($"处理接收结果失败: {ex.Message}");
                         Disconnect();
                         yield break;
                     }
-                }
-                while (!result.EndOfMessage);
+                } while (!result.EndOfMessage);
 
                 // 处理完整消息
-                try
-                {
+                try {
                     string message = Encoding.UTF8.GetString(memoryStream.ToArray());
                     OnMessageReceived?.Invoke(message);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     Debug.LogError($"处理消息失败: {ex.Message}");
                 }
             }
@@ -226,8 +186,7 @@ public class WebSocketManager : MonoBehaviour
         }
     }
 
-    void OnDestroy()
-    {
+    void OnDestroy() {
         Disconnect();
     }
 }

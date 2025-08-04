@@ -4,20 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class MessageItem : MonoBehaviour
-{
+public class MessageItem : MonoBehaviour {
     public RectTransform bg; // 消息背景
     public Text text; // 消息文本
     public Image bgImage;    // 背景图片组件
     public CanvasGroup canvasGroup; // 用于控制透明度
     public int Index { get; set; } = -1; // 消息索引
 
-    void Awake()
-    {
+    void Awake() {
         // 确保CanvasGroup组件存在
         canvasGroup = GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-        {
+        if (canvasGroup == null) {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
@@ -29,15 +26,13 @@ public class MessageItem : MonoBehaviour
     }
 
     // 设置消息文本并调整背景
-    public void SetText(string messageText)
-    {
+    public void SetText(string messageText) {
         this.text.text = messageText;
         ResizeBackground();
     }
 
     // 调整背景大小（最大宽度400，高度自适应）
-    private void ResizeBackground()
-    {
+    private void ResizeBackground() {
         // 强制刷新布局（标准Text组件方式）
         LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
 
@@ -59,8 +54,7 @@ public class MessageItem : MonoBehaviour
     }
 
     // 设置对齐方式 (true=右侧, false=左侧)
-    public void SetAlignment(bool isRightSide)
-    {
+    public void SetAlignment(bool isRightSide) {
         // 设置锚点和轴心
         bg.anchorMin = new Vector2(isRightSide ? 1 : 0, 0.5f);
         bg.anchorMax = new Vector2(isRightSide ? 1 : 0, 0.5f);
@@ -74,10 +68,8 @@ public class MessageItem : MonoBehaviour
     }
 
     // 设置背景样式
-    public void SetStyle(Color bgColor)
-    {
-        if (bgImage != null)
-        {
+    public void SetStyle(Color bgColor) {
+        if (bgImage != null) {
             bgImage.color = bgColor;
         }
 
@@ -86,8 +78,7 @@ public class MessageItem : MonoBehaviour
     }
 
     // 设置透明度
-    public void SetAlpha(float alpha)
-    {
+    public void SetAlpha(float alpha) {
         canvasGroup.alpha = alpha;
     }
 }

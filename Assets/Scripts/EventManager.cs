@@ -8,6 +8,10 @@ public static class EventManager
     // 定义事件类型常量
     public const string OnMessageSent = "OnMessageSent";
     public const string AddMessageToChat = "AddMessageToChat";
+    public const string SoundToggleEvent = "SoundToggleEvent";
+    public const string CallButtonEvent = "CallButtonEvent";
+    public const string ConnectionStatusEvent = "ConnectionStatusEvent";
+    public const string ConnectingStatusEvent = "ConnectingStatusEvent"; // 新增连接中事件
 
     public static void StartListening(string eventName, Action<object> listener)
     {

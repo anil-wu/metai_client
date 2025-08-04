@@ -5,31 +5,26 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class GuestLoginResponse
-{
+public class GuestLoginResponse {
     public string message;
     public string token;
 }
 
-public class LoginUI : MonoBehaviour
-{
+public class LoginUI : MonoBehaviour {
     public InputField usernameInput;
     public Button guestLoginButton;
 
-    void Start()
-    {
+    void Start() {
         // 绑定按钮点击事件
         guestLoginButton.onClick.AddListener(OnGuestLoginClick);
     }
 
-    void OnGuestLoginClick()
-    {
+    void OnGuestLoginClick() {
         Debug.Log("OnGuestLoginClick");
         StartCoroutine(LoginAsGuest());
     }
 
-    IEnumerator LoginAsGuest()
-    {
+    IEnumerator LoginAsGuest() {
         string url = "http://localhost:3001/auth/guest";
         string username = usernameInput.text;
 
@@ -48,8 +43,7 @@ public class LoginUI : MonoBehaviour
         yield return request.SendWebRequest();
 
         // 处理响应
-        if (request.result == UnityWebRequest.Result.Success)
-        {
+        if (request.result == UnityWebRequest.Result.Success) {
             GuestLoginResponse response = JsonUtility.FromJson<GuestLoginResponse>(request.downloadHandler.text);
             Debug.Log($"{response.message}, Token: {response.token}");
 
@@ -66,9 +60,7 @@ public class LoginUI : MonoBehaviour
 
             // 隐藏登录界面
             gameObject.SetActive(false);
-        }
-        else
-        {
+        } else {
             Debug.LogError($"登录失败: {request.error}");
         }
     }
