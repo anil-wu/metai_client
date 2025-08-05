@@ -1,0 +1,37 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    container:
+      image: unityci/editor:2022.3.62f1-android
+      options: -e UNITY_LICENSE -e UNITY_PASSWORD
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+
+    - name: Activate Unity License
+      env:
+        UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      run: |
+        unity-editor -batchmode -nographics -logFile - -executeMethod UnityEditor.SyncVS.SyncSolution -quit
+        /bin/bash -c "echo '$UNITY_LICENSE' | base64 -d > /root/.local/share/unity3d/Unity/Unity_lic.ulf"
+        unity-editor -batchmode -nographics -logFile - -quit -returnlicense || true
+
+    - name: Build Android APK
+      run: |
+        unity-editor -batchmode -nographics -logFile - -projectPath . -buildTarget Android -executeMethod BuildScript.BuildAndroid -quit
+
+    - name: Archive APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: android-apk
+        path: Builds/Android/*.apk
