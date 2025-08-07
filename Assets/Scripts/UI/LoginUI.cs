@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,19 +14,17 @@ public class GuestLoginResponse {
 public class LoginUI : MonoBehaviour {
     public InputField usernameInput;
     public Button guestLoginButton;
+    public string url;
 
     void Start() {
-        // 绑定按钮点击事件
         guestLoginButton.onClick.AddListener(OnGuestLoginClick);
     }
 
     void OnGuestLoginClick() {
-        Debug.Log("OnGuestLoginClick");
         StartCoroutine(LoginAsGuest());
     }
 
     IEnumerator LoginAsGuest() {
-        string url = "http://localhost:3001/auth/guest";
         string username = usernameInput.text;
 
         // 创建请求体
@@ -45,7 +44,6 @@ public class LoginUI : MonoBehaviour {
         // 处理响应
         if (request.result == UnityWebRequest.Result.Success) {
             GuestLoginResponse response = JsonUtility.FromJson<GuestLoginResponse>(request.downloadHandler.text);
-            Debug.Log($"{response.message}, Token: {response.token}");
 
             // 保存 Token
             PlayerPrefs.SetString("AuthToken", response.token);

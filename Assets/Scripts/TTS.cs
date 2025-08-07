@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking; // 添加 UnityWebRequest 所需命名空间
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -12,8 +13,16 @@ using UnityEngine;
 
 public class TTS {
     // TTS 配置参数
-    public string appkey = "V6fJ9tzk8lpPsJDi";
-    public string token = "a103f0e5ec364bd4abe7c600dfb65fd2";
+    private string _aliyunToken;
+    private string _aliyunAppkey;
+    public string appkey {
+        get => string.IsNullOrEmpty(_aliyunAppkey) ? "V6fJ9tzk8lpPsJDi" : _aliyunAppkey;
+        set => _aliyunAppkey = value;
+    }
+    public string token {
+        get => string.IsNullOrEmpty(_aliyunToken) ? "9dad9b5b6f854a7d9b55a17e07dbf069" : _aliyunToken;
+        set => _aliyunToken = value;
+    }
     public string voice = "zhibei_emo";
     // public string emotionCategory = "happy";
     public float emotionIntensity = 1.0f;
@@ -26,6 +35,33 @@ public class TTS {
         // 设置音频文件保存路径（必须在 Unity 生命周期方法中调用）
         audioSavePath = Path.Combine(Application.persistentDataPath, "tts_audio.wav");
         Debug.Log("TTS 音频将保存至: " + audioSavePath);
+    }
+
+    public IEnumerator GetAliyunToken(string authToken, string url = "http://localhost:3001/auth/aliyun-token") {
+
+        // 创建请求
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("Authorization", "Bearer " + authToken);
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // 发送请求
+        yield return request.SendWebRequest();
+
+        // 处理响应
+        if (request.result == UnityWebRequest.Result.Success) {
+            AliTokenResponse response = JsonUtility.FromJson<AliTokenResponse>(request.downloadHandler.text);
+            token = response.token;
+            appkey = response.appkey;
+            Debug.Log("阿里云语音 Token 获取成功: token=" + token + ", appkey=" + appkey);
+        } else {
+            Debug.LogError("获取阿里云语音 Token 失败: " + request.error);
+        }
+    }
+
+    [System.Serializable]
+    private class AliTokenResponse {
+        public string token;
+        public string appkey;
     }
 
     // 合成语音

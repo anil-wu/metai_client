@@ -893,8 +893,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   connectionStatusText: {fileID: 0}
   role2d: {fileID: 347561735}
-  appkey: npc_sk_uf5yyQUKgkNsjnA15DLFmNfotDOHHBxd
-  versionId: da8869e4-adf5-406d-b8f3-bde830d95049
+  appkey: npc_sk_c5W9dHxnrsL8foawDxglEYDtwH77s0rs
+  versionId: f8f1629f-754a-46ad-9eaf-c48200f7eb2b
   audioSource: {fileID: 347561734}
 --- !u!1 &699895555
 GameObject:
@@ -1201,6 +1201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   usernameInput: {fileID: 172631123}
   guestLoginButton: {fileID: 1759595699}
+  url: http://47.112.97.49:3001/auth/guest
 --- !u!1 &855673304
 GameObject:
   m_ObjectHideFlags: 0
@@ -2435,8 +2436,8 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 963194228}
-  - {fileID: 705507995}
-  - {fileID: 316021530}
   - {fileID: 699895559}
+  - {fileID: 705507995}
   - {fileID: 459164333}
+  - {fileID: 963194228}
+  - {fileID: 316021530}
