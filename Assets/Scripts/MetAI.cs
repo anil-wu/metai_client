@@ -176,7 +176,7 @@ public class MetAI : MonoBehaviour {
 
     // 连接WebSocket
     private void ConnectWebSocket() {
-        webSocketManager.Connect("ws://localhost:3002");
+        webSocketManager.Connect("ws://47.112.97.49:3002");
     }
 
     // WAV 音频工具类
@@ -247,6 +247,7 @@ public class MetAI : MonoBehaviour {
                 ""data"": {{
                     ""appkey"": ""{appkey}"",
                     ""token"": ""{token}"",
+                    ""versionName"": ""v0"",
                     ""versionId"": ""{versionId}""
                 }}
             }}";
