@@ -98,6 +98,9 @@ public class MetAI : MonoBehaviour {
 
             // 启动连接协程
             // ConnectWebSocket(); // 替换为实际 WebSocket 服务器地址
+
+            // 获取阿里云语音 Token
+            StartCoroutine(tts.GetAliyunToken(token));
         }
     }
 
@@ -140,6 +143,19 @@ public class MetAI : MonoBehaviour {
         AudioClip clip = WavUtility.ToAudioClip(audioData);
         audioSource.clip = clip;
         audioSource.Play();
+
+        // 添加音频播放完成监听
+        StartCoroutine(WaitForAudioFinish(clip.length));
+    }
+
+    // 等待音频播放完成
+    private IEnumerator WaitForAudioFinish(float duration) {
+        yield return new WaitForSeconds(duration);
+
+        // 音频播放完成后切换到随机待机动画
+        if (role2d != null) {
+            role2d.SwitchToRandomIdleImmediately();
+        }
     }
 
     // 处理声音切换事件

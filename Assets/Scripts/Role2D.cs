@@ -50,39 +50,44 @@ public class Role2D : MonoBehaviour {
         }
     }
 
-    // 随机播放待机动作的私有方法
-    private void PlayRandomIdleAction() {
-        // 获取所有待机动作文件
-        string actionsPath = Path.Combine(Application.streamingAssetsPath, "Actions");
-        string[] allFiles = Directory.GetFiles(actionsPath);
+    // 随机播放待机动作的公共方法
+    public void PlayRandomIdleAction() {
 
-        // 过滤出以 "idle_" 开头且不是 .meta 的文件
-        var idleActions = allFiles
-            .Select(Path.GetFileName)
-            .Where(name => name.StartsWith("idle_") && !name.EndsWith(".meta"))
-            .ToList();
+        // 按类型分组动作
+        var quietActions = new List<string> { "idle_6", "idle_7" };
+        var microActions = new List<string> { "idle_1", "idle_2", "idle_3", "idle_4", "idle_5" };
+        var activeActions = new List<string> { "idle_8", "idle_9", "idle_10" };
 
-        // 排除当前正在播放的动作
-        var availableActions = idleActions
-            .Where(name => name != currentIdleAction)
-            .ToList();
+        // 按概率选择动作类型
+        float randomValue = Random.value;
+        List<string> selectedType = null;
 
-        // 如果没有可用动作，则使用全部
-        if (!availableActions.Any()) {
-            availableActions = idleActions;
+        if (randomValue < 0.7f) {
+            selectedType = quietActions;
+        } else if (randomValue < 0.95f) {
+            selectedType = microActions;
+        } else {
+            selectedType = activeActions;
         }
 
-        // 随机选择一个动作
-        if (availableActions.Any()) {
-            int randomIndex = Random.Range(0, availableActions.Count);
-            string selectedAction = availableActions[randomIndex];
+        int randomIndex = Random.Range(0, selectedType.Count);
+        string selectedAction = selectedType[randomIndex];
 
-            // 播放选中的动作
-            PlayAction(selectedAction);
+        // 播放选中的动作
+        PlayAction(selectedAction + ".mp4");
+        // 设置播放完成回调
+        videoPlayer.loopPointReached += OnActionFinished;
+    }
 
-            // 设置播放完成回调
-            videoPlayer.loopPointReached += OnActionFinished;
+    // 公共方法：立即切换到随机待机动作（不等待当前动作完成）
+    public void SwitchToRandomIdleImmediately() {
+        // 取消当前视频的回调
+        if (videoPlayer.isPlaying) {
+            videoPlayer.loopPointReached -= OnActionFinished;
+            videoPlayer.Stop();
         }
+        // 直接播放随机待机动作
+        PlayRandomIdleAction();
     }
 
     // 动作播放完成回调
