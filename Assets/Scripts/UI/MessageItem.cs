@@ -10,6 +10,7 @@ public class MessageItem : MonoBehaviour {
     public Image bgImage; // 背景图片组件
     public CanvasGroup canvasGroup; // 用于控制透明度
     public int Index { get; set; } = -1; // 消息索引
+    public bool isRightSide { get; private set; } // 记录对齐方式
 
     void Awake() {
         // 确保 CanvasGroup 组件存在
@@ -55,13 +56,15 @@ public class MessageItem : MonoBehaviour {
 
     // 设置对齐方式 (true = 右侧, false = 左侧)
     public void SetAlignment(bool isRightSide) {
+        this.isRightSide = isRightSide; // 记录对齐状态
+
         // 设置锚点和轴心
         bg.anchorMin = new Vector2(isRightSide ? 1 : 0, 0.5f);
         bg.anchorMax = new Vector2(isRightSide ? 1 : 0, 0.5f);
         bg.pivot = new Vector2(isRightSide ? 1 : 0, 0.5f);
 
-        // 重置位置
-        bg.anchoredPosition = Vector2.zero;
+        // 重置位置并固定 x 坐标为 20
+        bg.anchoredPosition = new Vector2(isRightSide ? -20 : 20, 0);
 
         // 设置文本对齐方式（标准 Text 组件）
         text.alignment = isRightSide ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;

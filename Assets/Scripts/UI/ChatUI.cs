@@ -123,12 +123,12 @@ public class ChatUI : MonoBehaviour {
         StartCoroutine(AnimateMessageEnter(currentMessage));
     }
 
-    // 消息进入动画
+    // 消息进入动画（保留固定 x 坐标）
     private IEnumerator AnimateMessageEnter(MessageItem item) {
         RectTransform rt = item.GetComponent<RectTransform>();
         float elapsed = 0;
         Vector3 startPos = rt.anchoredPosition;
-        Vector3 targetPos = Vector2.zero;
+        Vector3 targetPos = new Vector2(item.isRightSide ? -20 : 20, 0); // 使用固定 x 坐标
 
         while (elapsed < animationDuration) {
             elapsed += Time.deltaTime;
@@ -152,12 +152,12 @@ public class ChatUI : MonoBehaviour {
         item.SetAlpha(1);
     }
 
-    // 消息退出动画
+    // 消息退出动画（保留固定 x 坐标）
     private IEnumerator AnimateMessageExit(MessageItem item) {
         RectTransform rt = item.GetComponent<RectTransform>();
         float elapsed = 0;
         Vector3 startPos = rt.anchoredPosition;
-        Vector3 targetPos = new Vector2(0, verticalOffset); // 向上移动
+        Vector3 targetPos = new Vector2(item.isRightSide ? -20 : 20, verticalOffset); // 使用固定 x 坐标
 
         while (elapsed < animationDuration) {
             elapsed += Time.deltaTime;
