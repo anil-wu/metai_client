@@ -37,7 +37,7 @@ public class TTS {
         Debug.Log("TTS 音频将保存至: " + audioSavePath);
     }
 
-    public IEnumerator GetAliyunToken(string authToken, string url = "http://localhost:3001/auth/aliyun-token") {
+    public IEnumerator GetAliyunToken(string authToken, string url) {
 
         // 创建请求
         UnityWebRequest request = UnityWebRequest.Get(url);

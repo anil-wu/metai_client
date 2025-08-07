@@ -11,6 +11,7 @@ public static class EventManager {
     public const string CallButtonEvent = "CallButtonEvent";
     public const string ConnectionStatusEvent = "ConnectionStatusEvent";
     public const string ConnectingStatusEvent = "ConnectingStatusEvent"; // 新增连接中事件
+    public const string CloseWebSocketEvent = "CloseWebSocketEvent"; // 关闭WebSocket事件
 
     public static void StartListening(string eventName, Action<object> listener) {
         if (eventDictionary.TryGetValue(eventName, out Action<object> thisEvent)) {

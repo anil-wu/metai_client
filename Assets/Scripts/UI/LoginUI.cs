@@ -6,7 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class GuestLoginResponse {
+public class GuestLoginResponse
+{
     public string message;
     public string token;
 }
@@ -14,10 +15,15 @@ public class GuestLoginResponse {
 public class LoginUI : MonoBehaviour {
     public InputField usernameInput;
     public Button guestLoginButton;
-    public string url;
+    public GameObject erroTips;
+    public Text erroText;
+    public string apiUrl; // http://47.112.97.49:3001, http://localhost:3001
+    public string chatUrl;  // ws://47.112.97.49:3002,  ws://localhost:3002
 
-    void Start() {
+    void Start()
+    {
         guestLoginButton.onClick.AddListener(OnGuestLoginClick);
+        erroTips.SetActive(false); // 登录前隐藏错误提示
     }
 
     void OnGuestLoginClick() {
@@ -33,7 +39,7 @@ public class LoginUI : MonoBehaviour {
         byte[] rawBody = System.Text.Encoding.UTF8.GetBytes(jsonBody);
 
         // 创建 POST 请求
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        UnityWebRequest request = new UnityWebRequest(apiUrl+"/auth/guest", "POST");
         request.uploadHandler = new UploadHandlerRaw(rawBody);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
@@ -51,7 +57,9 @@ public class LoginUI : MonoBehaviour {
             // 触发登录成功事件
             var loginData = new Dictionary<string, object> {
                 { "username", usernameInput.text },
-                { "token", response.token }
+                { "token", response.token },
+                { "apiUrl", apiUrl},
+                { "chatUrl", chatUrl }
             };
             EventManager.TriggerEvent("OnLoginSuccess", loginData);
 
@@ -59,6 +67,8 @@ public class LoginUI : MonoBehaviour {
             gameObject.SetActive(false);
         } else {
             Debug.LogError($"登录失败: {request.error}");
+            erroText.text = request.error; // 设置错误文本
+            erroTips.SetActive(true);      // 显示错误提示
         }
     }
 }

@@ -6,6 +6,7 @@ public class StateUI : MonoBehaviour {
     // UI 元素引用
     public Button soundBtn;
     public Button callBtn;
+    public Button CallOffBtn;
     public Image linkIcon;
     public Image linking; // 新增连接中状态显示组件
     public Text linkTips;
@@ -27,6 +28,7 @@ public class StateUI : MonoBehaviour {
         // 初始化按钮事件
         soundBtn.onClick.AddListener(ToggleSound);
         callBtn.onClick.AddListener(ConnectWebSocket);
+        CallOffBtn.onClick.AddListener(OnCallOffButtonClicked); // 添加CallOffBtn点击事件
 
         // 记录 CallBtn 初始位置
         callBtnInitialPos = callBtn.transform.localPosition;
@@ -138,6 +140,12 @@ public class StateUI : MonoBehaviour {
     private void UpdateConnectingStatus(string progress) {
         // 只更新文本，不改变显示状态（状态已在点击 CallBtn 时设置）
         linkTips.text = progress;
+    }
+
+    // CallOff按钮点击处理
+    private void OnCallOffButtonClicked() {
+        // 触发关闭WebSocket事件
+        EventManager.TriggerEvent(EventManager.CloseWebSocketEvent, null);
     }
 
     // 重置 Call 按钮状态

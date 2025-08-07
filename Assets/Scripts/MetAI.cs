@@ -17,7 +17,9 @@ public class MetAI : MonoBehaviour {
 
     // WebSocket 认证信息
     public string appkey = ""; // 替换为实际token
+    public string characterId = "";
     public string versionId = "";
+    public string versionName = "";
 
     private string username; // 用户名
     private string token; // 登录后获得的token
@@ -27,6 +29,11 @@ public class MetAI : MonoBehaviour {
 
     // WebSocket 管理器
     private WebSocketManager webSocketManager;
+
+    // 存储WebSocket URL
+    private string chatUrl;
+    private string apiUrl;
+    private string aliAppkey;
 
     // 音频播放组件
     public AudioSource audioSource;
@@ -47,6 +54,8 @@ public class MetAI : MonoBehaviour {
         EventManager.StartListening(EventManager.SoundToggleEvent, HandleSoundToggle);
         // 注册呼叫按钮事件
         EventManager.StartListening(EventManager.CallButtonEvent, HandleCallButton);
+        // 注册关闭WebSocket事件
+        EventManager.StartListening(EventManager.CloseWebSocketEvent, HandleCloseWebSocket);
 
         // 初始化 TTS
         tts = new TTS();
@@ -71,6 +80,7 @@ public class MetAI : MonoBehaviour {
         EventManager.StopListening("OnLoginSuccess", HandleLoginSuccess);
         EventManager.StopListening(EventManager.SoundToggleEvent, HandleSoundToggle);
         EventManager.StopListening(EventManager.CallButtonEvent, HandleCallButton);
+        EventManager.StopListening(EventManager.CloseWebSocketEvent, HandleCloseWebSocket);
     }
 
     // 处理登录成功事件
@@ -79,12 +89,13 @@ public class MetAI : MonoBehaviour {
         if (loginData != null) {
             // 更新用户信息
             if (loginData.ContainsKey("username")) {
-                username = loginData["username"].ToString();
+
             }
 
-            if (loginData.ContainsKey("token")) {
-                token = loginData["token"].ToString();
-            }
+            username = loginData["username"].ToString();
+            token = loginData["token"].ToString();
+            apiUrl = loginData["apiUrl"].ToString();
+            chatUrl = loginData["chatUrl"].ToString();
 
             // 显示MetAI界面
             if (gameObject != null) {
@@ -100,7 +111,8 @@ public class MetAI : MonoBehaviour {
             // ConnectWebSocket(); // 替换为实际 WebSocket 服务器地址
 
             // 获取阿里云语音 Token
-            StartCoroutine(tts.GetAliyunToken(token));
+            Debug.Log($"获取阿里云语音{token}");
+            StartCoroutine(tts.GetAliyunToken(token, apiUrl+"/auth/aliyun-token"));
         }
     }
 
@@ -174,9 +186,21 @@ public class MetAI : MonoBehaviour {
         ConnectWebSocket();
     }
 
+    // 处理关闭WebSocket事件
+    private void HandleCloseWebSocket(object param) {
+        // 关闭WebSocket连接
+        if (webSocketManager != null) {
+            webSocketManager.Disconnect();
+        }
+    }
+
     // 连接WebSocket
     private void ConnectWebSocket() {
-        webSocketManager.Connect("ws://47.112.97.49:3002");
+        if (string.IsNullOrEmpty(chatUrl)) {
+            Debug.LogError("chatUrl为空，无法连接WebSocket");
+            return;
+        }
+        webSocketManager.Connect(chatUrl);
     }
 
     // WAV 音频工具类
@@ -247,7 +271,8 @@ public class MetAI : MonoBehaviour {
                 ""data"": {{
                     ""appkey"": ""{appkey}"",
                     ""token"": ""{token}"",
-                    ""versionName"": ""v0"",
+                    ""characterId"": ""{characterId}"",
+                    ""versionName"": ""{versionName}"",
                     ""versionId"": ""{versionId}""
                 }}
             }}";
