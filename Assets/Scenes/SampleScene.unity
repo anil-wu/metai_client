@@ -2362,7 +2362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1103128927199415671, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -66
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 1292520269717862403, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2383,6 +2383,14 @@ PrefabInstance:
     - target: {fileID: 2612015394456979435, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3047330622214374720, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 700
+      objectReference: {fileID: 0}
+    - target: {fileID: 3047330622214374720, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 3600970813745469372, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_Sprite
@@ -2418,11 +2426,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4962261435128227077, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -66
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 6028305032239337026, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8018904728711442504, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 8370081408737667964, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 271
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1907777468156345291, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
