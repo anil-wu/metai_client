@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking; // 添加 UnityWebRequest 所需命名空间
 using UnityEngine.UI;
 using UnityEngine.Video;
 using System.IO;
@@ -24,8 +25,7 @@ public class MetAI : MonoBehaviour {
     private string username; // 用户名
     private string token; // 登录后获得的token
 
-    // TTS 实例
-    private TTS tts;
+    // 使用单例模式访问 TTS 和 ASR
 
     // WebSocket 管理器
     private WebSocketManager webSocketManager;
@@ -57,9 +57,7 @@ public class MetAI : MonoBehaviour {
         // 注册关闭WebSocket事件
         EventManager.StartListening(EventManager.CloseWebSocketEvent, HandleCloseWebSocket);
 
-        // 初始化 TTS
-        tts = new TTS();
-        tts.Init();
+        // TTS 和 ASR 使用单例模式，无需显式初始化
 
         // 初始化 WebSocket
         webSocketManager = gameObject.AddComponent<WebSocketManager>();
@@ -112,7 +110,7 @@ public class MetAI : MonoBehaviour {
 
             // 获取阿里云语音 Token
             Debug.Log($"获取阿里云语音{token}");
-            StartCoroutine(tts.GetAliyunToken(token, apiUrl+"/auth/aliyun-token"));
+            StartCoroutine(GetAliyunToken(token, apiUrl+"/auth/aliyun-token"));
         }
     }
 
@@ -244,6 +242,37 @@ public class MetAI : MonoBehaviour {
 
     // 视频播放相关方法已移除（由 Role2D 替代）
 
+    // 获取阿里云语音 Token
+    public IEnumerator GetAliyunToken(string authToken, string url) {
+        // 创建请求
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("Authorization", "Bearer " + authToken);
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // 发送请求
+        yield return request.SendWebRequest();
+
+        // 处理响应
+        if (request.result == UnityWebRequest.Result.Success) {
+            AliTokenResponse response = JsonUtility.FromJson<AliTokenResponse>(request.downloadHandler.text);
+            string _aliyunToken = response.token;
+            string _aliyunAppkey = response.appkey;
+            Debug.Log("阿里云语音 Token 获取成功: token=" + _aliyunToken + ", appkey=" + _aliyunAppkey);
+
+            // 设置 TTS 和 ASR 凭证
+            TTS.Instance.SetCredentials(_aliyunToken, _aliyunAppkey);
+            ASR.Instance.SetCredentials(_aliyunToken, _aliyunAppkey);
+        } else {
+            Debug.LogError("获取阿里云语音 Token 失败: " + request.error);
+        }
+    }
+
+    [System.Serializable]
+    private class AliTokenResponse {
+        public string token;
+        public string appkey;
+    }
+
     // 连接进度处理
     private void HandleConnectionProgress(string progress) {
         // 触发连接中状态事件
@@ -325,7 +354,7 @@ public class MetAI : MonoBehaviour {
 
                     // 根据角色声音开关状态决定是否播放语音
                     if (isCharacterSoundOn) {
-                        StartCoroutine(tts.SynthesizeSpeech(answerText, response.data.emotion, PlayAudioFromBytes));
+                        StartCoroutine(TTS.Instance.SynthesizeSpeech(answerText, response.data.emotion, PlayAudioFromBytes));
                     }
                     // 使用Role2D播放动作
                     if (role2d != null) {

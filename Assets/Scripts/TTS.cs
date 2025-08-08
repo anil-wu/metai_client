@@ -12,17 +12,27 @@ using UnityEngine;
 #endif
 
 public class TTS {
-    // TTS 配置参数
-    private string _aliyunToken;
-    private string _aliyunAppkey;
-    public string appkey {
-        get => string.IsNullOrEmpty(_aliyunAppkey) ? "V6fJ9tzk8lpPsJDi" : _aliyunAppkey;
-        set => _aliyunAppkey = value;
+    // 单例实例
+    private static TTS _instance;
+    public static TTS Instance {
+        get {
+            if (_instance == null) {
+                _instance = new TTS();
+            }
+            return _instance;
+        }
     }
-    public string token {
-        get => string.IsNullOrEmpty(_aliyunToken) ? "9dad9b5b6f854a7d9b55a17e07dbf069" : _aliyunToken;
-        set => _aliyunToken = value;
+
+    // 私有构造函数
+    private TTS() {
+        // 设置音频文件保存路径
+        audioSavePath = Path.Combine(Application.persistentDataPath, "tts_audio.wav");
+        Debug.Log("TTS 音频将保存至: " + audioSavePath);
     }
+
+    // TTS 配置参数（由 MetAI 管理凭证）
+    public string appkey { get; set; }
+    public string token { get; set; }
     public string voice = "zhibei_emo";
     // public string emotionCategory = "happy";
     public float emotionIntensity = 1.0f;
@@ -31,37 +41,13 @@ public class TTS {
     private string audioSavePath;
     public string AudioSavePath => audioSavePath; // 提供公共访问
 
-    public void Init() {
-        // 设置音频文件保存路径（必须在 Unity 生命周期方法中调用）
-        audioSavePath = Path.Combine(Application.persistentDataPath, "tts_audio.wav");
-        Debug.Log("TTS 音频将保存至: " + audioSavePath);
-    }
+    // 不再需要外部初始化
 
-    public IEnumerator GetAliyunToken(string authToken, string url) {
-
-        // 创建请求
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        request.SetRequestHeader("Authorization", "Bearer " + authToken);
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        // 发送请求
-        yield return request.SendWebRequest();
-
-        // 处理响应
-        if (request.result == UnityWebRequest.Result.Success) {
-            AliTokenResponse response = JsonUtility.FromJson<AliTokenResponse>(request.downloadHandler.text);
-            token = response.token;
-            appkey = response.appkey;
-            Debug.Log("阿里云语音 Token 获取成功: token=" + token + ", appkey=" + appkey);
-        } else {
-            Debug.LogError("获取阿里云语音 Token 失败: " + request.error);
-        }
-    }
-
-    [System.Serializable]
-    private class AliTokenResponse {
-        public string token;
-        public string appkey;
+    // 设置阿里云凭证
+    public void SetCredentials(string token, string appkey) {
+        this.token = token;
+        this.appkey = appkey;
+        Debug.Log("TTS 凭证已设置: token=" + token + ", appkey=" + appkey);
     }
 
     // 合成语音
