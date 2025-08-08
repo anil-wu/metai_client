@@ -47,6 +47,9 @@ public class ChatUI : MonoBehaviour {
 
     // 处理连接状态变化
     private void HandleConnectionStatus(object isConnectedObj) {
+        // 确保游戏对象处于激活状态才能启动协程
+        if (!gameObject.activeInHierarchy) return;
+
         if (isConnectedObj is bool isConnected) {
             if (isConnected) {
                 // 连接成功时淡入显示

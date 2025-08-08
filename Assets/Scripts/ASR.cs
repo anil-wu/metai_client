@@ -31,8 +31,13 @@ public class ASR {
         Debug.Log("ASR 凭证已设置: token=" + token + ", appkey=" + appkey);
     }
 
-    // 语音识别方法
+    // 语音识别方法（异步实现）
     public IEnumerator RecognizeSpeech(byte[] audioData, System.Action<string> callback) {
+        yield return RecognizeSpeechAsync(audioData, callback);
+    }
+
+    // 真正的异步识别实现
+    private IEnumerator RecognizeSpeechAsync(byte[] audioData, System.Action<string> callback) {
         string url = "https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/asr";
 
         // 构建请求参数
@@ -43,37 +48,37 @@ public class ASR {
             {"sample_rate", "16000"}
         };
 
-        // 发送请求
-        using (HttpClient client = new HttpClient()) {
-            // 添加查询参数
-            var builder = new UriBuilder(url);
-            var queryString = System.Web.HttpUtility.ParseQueryString(builder.Query);
-            foreach (var param in query) {
-                queryString[param.Key] = param.Value;
-            }
-            builder.Query = queryString.ToString();
+        // 添加查询参数
+        var builder = new UriBuilder(url);
+        var queryString = System.Web.HttpUtility.ParseQueryString(builder.Query);
+        foreach (var param in query) {
+            queryString[param.Key] = param.Value;
+        }
+        builder.Query = queryString.ToString();
 
-            // 创建请求内容
-            ByteArrayContent content = new ByteArrayContent(audioData);
-            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        // 使用UnityWebRequest实现异步请求
+        using (UnityEngine.Networking.UnityWebRequest request = new UnityEngine.Networking.UnityWebRequest(builder.ToString(), "POST")) {
+            // 设置请求数据
+            request.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(audioData);
+            request.uploadHandler.contentType = "application/octet-stream";
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
 
-            // 发送请求
-            HttpResponseMessage response = client.PostAsync(builder.ToString(), content).Result;
+            // 发送异步请求
+            yield return request.SendWebRequest();
 
-            if (response.IsSuccessStatusCode) {
-                string result = response.Content.ReadAsStringAsync().Result;
-                // 解析JSON响应（简化处理）
+            // 处理响应
+            if (request.result == UnityEngine.Networking.UnityWebRequest.Result.Success) {
+                string result = request.downloadHandler.text;
+                // 解析JSON响应
                 int textStart = result.IndexOf("\"result\"") + 10;
                 int textEnd = result.IndexOf("\"", textStart);
                 string recognizedText = result.Substring(textStart, textEnd - textStart);
-                Debug.Log("recognizedText " + recognizedText);
+                Debug.Log("ASR识别结果: " + recognizedText);
                 callback?.Invoke(recognizedText);
             } else {
-                Debug.LogError($"ASR请求失败: {response.StatusCode}");
+                Debug.LogError($"ASR请求失败: {request.error}");
                 callback?.Invoke(null);
             }
         }
-
-        yield return null;
     }
 }

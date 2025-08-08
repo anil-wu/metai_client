@@ -63,11 +63,17 @@ public class WebSocketManager : MonoBehaviour {
         if (webSocket == null) return;
 
         try {
-            await webSocket.CloseAsync(
-                WebSocketCloseStatus.NormalClosure,
-                "关闭连接",
-                CancellationToken.None
-            );
+            // 只在有效状态下执行关闭操作
+            if (webSocket.State == WebSocketState.Open ||
+                webSocket.State == WebSocketState.CloseReceived ||
+                webSocket.State == WebSocketState.CloseSent) {
+
+                await webSocket.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure,
+                    "关闭连接",
+                    CancellationToken.None
+                );
+            }
         } finally {
             if (webSocket != null) {
                 webSocket.Dispose();

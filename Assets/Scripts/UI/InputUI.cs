@@ -52,6 +52,20 @@ public class InputUI : MonoBehaviour {
         SetTextInputMode();
     }
 
+    void Update() {
+        // Windows平台下空格键录音控制
+        #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        if (SoundInputBox.activeSelf) {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                StartRecording();
+            }
+            if (Input.GetKeyUp(KeyCode.Space)) {
+                StopRecording();
+            }
+        }
+        #endif
+    }
+
     // 发送按钮点击处理
     private void OnSendButtonClick() {
         string message = videoUrlInput.text.Trim();
@@ -115,17 +129,31 @@ public class InputUI : MonoBehaviour {
     // 停止录音并识别（当松开录音按钮时调用）
     private void StopRecording() {
         if (!isRecording) return;
-        // 移除按钮状态切换逻辑
         isRecording = false;
-        // 停止录音
         Microphone.End(null);
+
+        // 显示处理中提示
+        videoUrlInput.text = "处理中...";
+        videoUrlInput.interactable = false;
+
+        // 启动协程处理音频转换和识别
+        StartCoroutine(ProcessAudioData());
+    }
+
+    // 处理音频数据的协程
+    private IEnumerator ProcessAudioData() {
         // 获取录音数据
         float[] samples = new float[recordedClip.samples * recordedClip.channels];
         recordedClip.GetData(samples, 0);
+
         // 转换为16位PCM格式（WAV）
         byte[] wavData = ConvertToWAV(samples, recordedClip.channels, SAMPLE_RATE);
+
         // 调用语音识别
-        StartCoroutine(RecognizeSpeech(wavData));
+        yield return StartCoroutine(RecognizeSpeech(wavData));
+
+        // 恢复输入框状态
+        videoUrlInput.interactable = true;
     }
 
     // 语音识别协程
@@ -144,28 +172,40 @@ public class InputUI : MonoBehaviour {
         }
     }
 
-    // 将音频数据转换为WAV格式
+    // 将音频数据转换为WAV格式（优化版）
     private byte[] ConvertToWAV(float[] samples, int channels, int sampleRate) {
-        using (MemoryStream stream = new MemoryStream()) {
-            // WAV文件头
-            stream.Write(Encoding.ASCII.GetBytes("RIFF"), 0, 4);
-            stream.Write(BitConverter.GetBytes(36 + samples.Length * 2), 0, 4); // 文件大小
-            stream.Write(Encoding.ASCII.GetBytes("WAVE"), 0, 4);
-            stream.Write(Encoding.ASCII.GetBytes("fmt "), 0, 4);
-            stream.Write(BitConverter.GetBytes(16), 0, 4); // fmt块大小
-            stream.Write(BitConverter.GetBytes((ushort)1), 0, 2); // PCM格式
-            stream.Write(BitConverter.GetBytes((ushort)channels), 0, 2); // 声道数
-            stream.Write(BitConverter.GetBytes(sampleRate), 0, 4); // 采样率
-            stream.Write(BitConverter.GetBytes(sampleRate * channels * 2), 0, 4); // 字节率
-            stream.Write(BitConverter.GetBytes((ushort)(channels * 2)), 0, 2); // 块对齐
-            stream.Write(BitConverter.GetBytes((ushort)16), 0, 2); // 位深度
-            stream.Write(Encoding.ASCII.GetBytes("data"), 0, 4);
-            stream.Write(BitConverter.GetBytes(samples.Length * 2), 0, 4); // 数据大小
+        // 预计算所需缓冲区大小
+        int dataSize = samples.Length * 2;
+        int fileSize = 36 + dataSize;
 
-            // 音频数据（16位PCM）
-            foreach (float sample in samples) {
-                short pcmSample = (short)(sample * short.MaxValue);
-                stream.Write(BitConverter.GetBytes(pcmSample), 0, 2);
+        // 使用MemoryStream预分配空间
+        using (MemoryStream stream = new MemoryStream(44 + dataSize)) {
+            // 使用BinaryWriter提高写入效率
+            using (BinaryWriter writer = new BinaryWriter(stream)) {
+                // RIFF头
+                writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+                writer.Write(fileSize);
+                writer.Write(Encoding.ASCII.GetBytes("WAVE"));
+
+                // fmt块
+                writer.Write(Encoding.ASCII.GetBytes("fmt "));
+                writer.Write(16); // fmt块大小
+                writer.Write((ushort)1); // PCM格式
+                writer.Write((ushort)channels); // 声道数
+                writer.Write(sampleRate); // 采样率
+                writer.Write(sampleRate * channels * 2); // 字节率
+                writer.Write((ushort)(channels * 2)); // 块对齐
+                writer.Write((ushort)16); // 位深度
+
+                // data块
+                writer.Write(Encoding.ASCII.GetBytes("data"));
+                writer.Write(dataSize); // 数据大小
+
+                // 音频数据（16位PCM）
+                foreach (float sample in samples) {
+                    short pcmSample = (short)(sample * short.MaxValue);
+                    writer.Write(pcmSample);
+                }
             }
 
             return stream.ToArray();
