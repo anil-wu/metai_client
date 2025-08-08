@@ -1905,7 +1905,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1637474061
 MonoBehaviour:
@@ -2400,6 +2400,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4326206004621451715, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 197
+      objectReference: {fileID: 0}
     - target: {fileID: 4740801755584663799, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
       propertyPath: TextInputBox
       value: 
@@ -2423,7 +2427,8 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 1907777468156345291, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
     - {fileID: 3646360922720290136, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4199409549050511273, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eda1bc2be7c5d8747972d71c9941f0d5, type: 3}

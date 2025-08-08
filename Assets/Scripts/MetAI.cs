@@ -56,6 +56,8 @@ public class MetAI : MonoBehaviour {
         EventManager.StartListening(EventManager.CallButtonEvent, HandleCallButton);
         // 注册关闭WebSocket事件
         EventManager.StartListening(EventManager.CloseWebSocketEvent, HandleCloseWebSocket);
+        // 注册停止TTS播放事件
+        EventManager.StartListening("StopTTSPlayback", HandleStopTTSPlayback);
 
         // TTS 和 ASR 使用单例模式，无需显式初始化
 
@@ -79,6 +81,12 @@ public class MetAI : MonoBehaviour {
         EventManager.StopListening(EventManager.SoundToggleEvent, HandleSoundToggle);
         EventManager.StopListening(EventManager.CallButtonEvent, HandleCallButton);
         EventManager.StopListening(EventManager.CloseWebSocketEvent, HandleCloseWebSocket);
+        EventManager.StopListening("StopTTSPlayback", HandleStopTTSPlayback);
+    }
+
+    // 处理停止TTS播放事件
+    private void HandleStopTTSPlayback(object param) {
+        StopTTSPlayback();
     }
 
     // 处理登录成功事件
@@ -146,6 +154,20 @@ public class MetAI : MonoBehaviour {
             webSocketManager.SendMessage(messageJson);
             Debug.Log("已发送消息: " + message);
         }
+    }
+
+    // 停止 TTS 播放
+    public void StopTTSPlayback() {
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
+            Debug.Log("已停止 TTS 播放");
+
+            if (role2d != null) {
+                role2d.SwitchToRandomIdleImmediately();
+            }
+        }
+
     }
 
     // 播放音频

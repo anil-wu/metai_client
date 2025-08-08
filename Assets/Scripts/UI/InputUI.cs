@@ -5,12 +5,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using System.Text;
+using UnityEngine.EventSystems; // 添加 EventSystems 命名空间
 
 public class InputUI : MonoBehaviour {
     public Button sendBtn;
     public InputField videoUrlInput;
-    public Button recordBtn; // 新增录音按钮
-    public Button stopRecordBtn; // 新增停止录音按钮
+    public Button recordBtn; // 录音按钮
+
     public Button textInput;    // 切换到文本输入按钮
     public Button recordInput;  //切换到语音输入按钮
 
@@ -27,12 +28,23 @@ public class InputUI : MonoBehaviour {
         // 绑定发送按钮点击事件
         sendBtn.onClick.AddListener(OnSendButtonClick);
 
-        // 绑定录音按钮事件
-        recordBtn.onClick.AddListener(StartRecording);
-        stopRecordBtn.onClick.AddListener(StopRecording);
-
         // 绑定切换按钮事件
         textInput.onClick.AddListener(OnTextInputClick);
+
+        // 为录音按钮添加事件触发器
+        EventTrigger trigger = recordBtn.gameObject.AddComponent<EventTrigger>();
+
+        // 添加按下事件
+        EventTrigger.Entry pointerDownEntry = new EventTrigger.Entry();
+        pointerDownEntry.eventID = EventTriggerType.PointerDown;
+        pointerDownEntry.callback.AddListener((data) => { StartRecording(); });
+        trigger.triggers.Add(pointerDownEntry);
+
+        // 添加松开事件
+        EventTrigger.Entry pointerUpEntry = new EventTrigger.Entry();
+        pointerUpEntry.eventID = EventTriggerType.PointerUp;
+        pointerUpEntry.callback.AddListener((data) => { StopRecording(); });
+        trigger.triggers.Add(pointerUpEntry);
         recordInput.onClick.AddListener(OnRecordInputClick);
 
 
@@ -81,27 +93,20 @@ public class InputUI : MonoBehaviour {
         recordInput.gameObject.SetActive(false);
         textInput.gameObject.SetActive(true);
 
-        stopRecordBtn.gameObject.SetActive(false);
+        // 移除停止按钮的显示逻辑
         recordBtn.gameObject.SetActive(true);
     }
 
     // 开始录音（当按下录音按钮时调用）
     private void StartRecording() {
-        stopRecordBtn.gameObject.SetActive(true);
-        recordBtn.gameObject.SetActive(false);
         if (isRecording) return;
+
+        // 触发停止 TTS 播放事件
+        EventManager.TriggerEvent("StopTTSPlayback", null);
 
         // 检查麦克风权限
         if (!Microphone.IsRecording(null)) {
             isRecording = true;
-
-            // 显示停止录音按钮
-            stopRecordBtn.gameObject.SetActive(true);
-            stopRecordBtn.interactable = true;
-
-            // 隐藏录音按钮
-            recordBtn.gameObject.SetActive(false);
-
             // 开始录音
             recordedClip = Microphone.Start(null, false, RECORD_LENGTH, SAMPLE_RATE);
         }
@@ -110,30 +115,17 @@ public class InputUI : MonoBehaviour {
     // 停止录音并识别（当松开录音按钮时调用）
     private void StopRecording() {
         if (!isRecording) return;
-        stopRecordBtn.gameObject.SetActive(false);
-        recordBtn.gameObject.SetActive(true);
-
+        // 移除按钮状态切换逻辑
         isRecording = false;
-
         // 停止录音
         Microphone.End(null);
-
         // 获取录音数据
         float[] samples = new float[recordedClip.samples * recordedClip.channels];
         recordedClip.GetData(samples, 0);
-
         // 转换为16位PCM格式（WAV）
         byte[] wavData = ConvertToWAV(samples, recordedClip.channels, SAMPLE_RATE);
-
-        // 保存录音文件（用于测试）
-        SaveRecordFile(wavData);
-
         // 调用语音识别
         StartCoroutine(RecognizeSpeech(wavData));
-
-        // 重置按钮状态
-        stopRecordBtn.gameObject.SetActive(false);
-        recordBtn.gameObject.SetActive(true);
     }
 
     // 语音识别协程
@@ -150,9 +142,6 @@ public class InputUI : MonoBehaviour {
             videoUrlInput.text = recognizedText;
             OnSendButtonClick();
         }
-        // 重置按钮状态
-        stopRecordBtn.interactable = false;
-        recordBtn.interactable = true;
     }
 
     // 将音频数据转换为WAV格式
@@ -180,27 +169,6 @@ public class InputUI : MonoBehaviour {
             }
 
             return stream.ToArray();
-        }
-    }
-
-    // 保存录音文件到工程目录
-    private void SaveRecordFile(byte[] wavData) {
-        try {
-            // 创建Records目录
-            string recordsDir = Path.Combine(Application.dataPath, "../Records");
-            if (!Directory.Exists(recordsDir)) {
-                Directory.CreateDirectory(recordsDir);
-            }
-
-            // 生成带时间戳的文件名
-            string fileName = $"record_{DateTime.Now:yyyyMMdd_HHmmss}.wav";
-            string filePath = Path.Combine(recordsDir, fileName);
-
-            // 保存文件
-            File.WriteAllBytes(filePath, wavData);
-            Debug.Log($"录音文件已保存: {filePath}");
-        } catch (Exception ex) {
-            Debug.LogError($"保存录音文件失败: {ex.Message}");
         }
     }
 }
