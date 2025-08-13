@@ -115,6 +115,9 @@ public class InputUI : MonoBehaviour {
     private void StartRecording() {
         if (isRecording) return;
 
+        // 修改按钮为绿色
+        recordBtn.GetComponent<Image>().color = Color.green;
+
         // 触发停止 TTS 播放事件
         EventManager.TriggerEvent("StopTTSPlayback", null);
 
@@ -129,6 +132,10 @@ public class InputUI : MonoBehaviour {
     // 停止录音并识别（当松开录音按钮时调用）
     private void StopRecording() {
         if (!isRecording) return;
+
+        // 修改按钮为白色
+        recordBtn.GetComponent<Image>().color = Color.white;
+
         isRecording = false;
         Microphone.End(null);
 
